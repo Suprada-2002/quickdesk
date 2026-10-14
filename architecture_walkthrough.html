@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>System Architecture</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --border: #e2e8f0;
+      --border-dark: #cbd5e1;
+      --text: #0f172a;
+      --text-muted: #64748b;
+      --indigo-bg: #f5f3ff;
+      --indigo-border: #6366f1;
+      --indigo-text: #4338ca;
+      --emerald-bg: #ecfdf5;
+      --emerald-border: #10b981;
+      --emerald-text: #065f46;
+      --amber-bg: #fffbeb;
+      --amber-border: #f59e0b;
+      --amber-text: #92400e;
+      --sky-bg: #f0f9ff;
+      --sky-border: #0284c7;
+      --sky-text: #0369a1;
+      --font-sans: 'Plus Jakarta Sans', system-ui, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html, body {
+      height: 100vh;
+      overflow: hidden;
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: var(--font-sans);
+    }
+
+    .canvas-container {
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 30px 20px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    /* Core Box Styles */
+    .arch-box {
+      background: var(--card-bg);
+      border: 1.5px solid var(--border-dark);
+      border-radius: 12px;
+      padding: 14px 22px;
+      box-shadow: 0 4px 12px rgba(15, 23, 42, 0.05);
+      text-align: center;
+      transition: all 0.2s ease;
+    }
+
+    .arch-box:hover {
+      box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+      transform: translateY(-1px);
+    }
+
+    .box-title {
+      font-size: 15px;
+      font-weight: 800;
+      letter-spacing: -0.01em;
+      margin-bottom: 6px;
+    }
+
+    .box-bullets {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .box-bullet {
+      background: #f1f5f9;
+      border: 1px solid var(--border);
+      color: #334155;
+      padding: 3px 9px;
+      border-radius: 6px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    /* Tier 1: Frontend */
+    .box-frontend {
+      width: 480px;
+      border-color: var(--indigo-border);
+      background: linear-gradient(180deg, #ffffff 0%, var(--indigo-bg) 100%);
+    }
+    .box-frontend .box-title { color: var(--indigo-text); }
+
+    /* Tier 2: Backend */
+    .box-backend {
+      width: 480px;
+      border-color: var(--emerald-border);
+      background: linear-gradient(180deg, #ffffff 0%, var(--emerald-bg) 100%);
+    }
+    .box-backend .box-title { color: var(--emerald-text); }
+
+    /* Vertical Connector 1 */
+    .v-connector-1 {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 520px;
+      padding: 12px 16px;
+    }
+
+    .conn-label {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 6px;
+      line-height: 1.3;
+    }
+
+    .conn-label-left {
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      color: #1d4ed8;
+      text-align: right;
+    }
+
+    .conn-label-right {
+      background: #ecfdf5;
+      border: 1px solid #a7f3d0;
+      color: #047857;
+      text-align: left;
+    }
+
+    .conn-arrow-center {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      color: #6366f1;
+      font-size: 14px;
+      font-weight: 700;
+      line-height: 1;
+    }
+
+    /* Branching SVG Pipe */
+    .branch-split-wrapper {
+      width: 780px;
+      position: relative;
+      margin: 8px 0;
+    }
+
+    .branch-svg {
+      width: 100%;
+      height: 32px;
+      display: block;
+    }
+
+    /* Bottom Split Layout */
+    .bottom-split {
+      display: grid;
+      grid-template-columns: 310px 450px;
+      gap: 36px;
+      align-items: start;
+    }
+
+    /* Left: PostgreSQL */
+    .box-postgres {
+      border-color: var(--amber-border);
+      background: linear-gradient(180deg, #ffffff 0%, var(--amber-bg) 100%);
+    }
+    .box-postgres .box-title { color: var(--amber-text); }
+
+    .postgres-sub {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 600;
+      color: #b45309;
+      margin-bottom: 8px;
+    }
+
+    /* Right: RAG Cascade */
+    .rag-cascade {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .rag-card {
+      width: 100%;
+      padding: 8px 14px;
+      border-radius: 8px;
+      background: #ffffff;
+      border: 1.5px solid var(--border);
+      box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      transition: all 0.2s ease;
+    }
+
+    .rag-card:hover {
+      box-shadow: 0 4px 12px rgba(15, 23, 42, 0.08);
+      transform: translateY(-1px);
+    }
+
+    .rag-title {
+      font-size: 12px;
+      font-weight: 800;
+      color: #1e293b;
+      white-space: nowrap;
+    }
+
+    .rag-detail {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-muted);
+      background: #f1f5f9;
+      border: 1px solid var(--border);
+      padding: 3px 8px;
+      border-radius: 4px;
+    }
+
+    .mini-arrow-down {
+      color: #94a3b8;
+      font-size: 13px;
+      font-weight: bold;
+      line-height: 1;
+    }
+  </style>
+</head>
+<body>
+
+<div class="canvas-container">
+
+  <!-- LEVEL 1: FRONTEND -->
+  <div class="arch-box box-frontend">
+    <div class="box-title">React + Vite Frontend</div>
+    <div class="box-bullets">
+      <span class="box-bullet">Tailwind CSS &amp; Lucide Icons</span>
+      <span class="box-bullet">Socket.IO Client</span>
+      <span class="box-bullet">Role-Based Route Guards</span>
+    </div>
+  </div>
+
+  <!-- CONNECTOR 1 -->
+  <div class="v-connector-1">
+    <div class="conn-label conn-label-left">
+      <div>REST Calls</div>
+      <div style="font-size: 9.5px; color: #64748b;">(Bearer JWT in Auth)</div>
+    </div>
+    <div class="conn-arrow-center">
+      <span>|</span>
+      <span>&darr; &uarr;</span>
+    </div>
+    <div class="conn-label conn-label-right">
+      <div>Bidirectional Events</div>
+      <div style="font-size: 9.5px; color: #64748b;">(ticket_created, ticket_resolved)</div>
+    </div>
+  </div>
+
+  <!-- LEVEL 2: BACKEND -->
+  <div class="arch-box box-backend">
+    <div class="box-title">FastAPI Backend (ASGI)</div>
+    <div class="box-bullets">
+      <span class="box-bullet">Python-SocketIO Server</span>
+      <span class="box-bullet">JWT &amp; Argon2id Security Layer</span>
+      <span class="box-bullet">Route-Level RBAC Dependencies</span>
+    </div>
+  </div>
+
+  <!-- BRANCHING CONNECTOR -->
+  <div class="branch-split-wrapper">
+    <svg class="branch-svg" viewBox="0 0 780 32" preserveAspectRatio="none">
+      <!-- Vertical stem from Backend center (x=390) -->
+      <line x1="390" y1="0" x2="390" y2="14" stroke="#94a3b8" stroke-width="2" />
+      <!-- Horizontal crossbar from left (x=155) to right (x=555) -->
+      <line x1="155" y1="14" x2="555" y2="14" stroke="#94a3b8" stroke-width="2" />
+      <!-- Left drop to PostgreSQL (x=155) -->
+      <line x1="155" y1="14" x2="155" y2="26" stroke="#94a3b8" stroke-width="2" />
+      <polygon points="150,24 155,31 160,24" fill="#94a3b8" />
+      <!-- Right drop to LangChain (x=555) -->
+      <line x1="555" y1="14" x2="555" y2="26" stroke="#94a3b8" stroke-width="2" />
+      <polygon points="550,24 555,31 560,24" fill="#94a3b8" />
+    </svg>
+  </div>
+
+  <!-- LEVEL 3: POSTGRESQL & RAG CASCADE -->
+  <div class="bottom-split">
+
+    <!-- LEFT: POSTGRESQL -->
+    <div class="arch-box box-postgres">
+      <div class="box-title">PostgreSQL Database</div>
+      <div class="postgres-sub">(SQLAlchemy 2.0 ORM)</div>
+      <div class="box-bullets" style="flex-direction: column; align-items: stretch; gap: 6px;">
+        <span class="box-bullet">Users &amp; Roles</span>
+        <span class="box-bullet">Tickets &amp; Statuses</span>
+        <span class="box-bullet">Override Audit Logs</span>
+      </div>
+    </div>
+
+    <!-- RIGHT: RAG CASCADE -->
+    <div class="rag-cascade">
+      <!-- RAG Card 1 -->
+      <div class="rag-card" style="border-left: 4px solid #6366f1;">
+        <span class="rag-title">LangChain Pipeline</span>
+        <span class="rag-detail">Text Splitter (400) &bull; Distance Calibrator</span>
+      </div>
+
+      <div class="mini-arrow-down">&darr;</div>
+
+      <!-- RAG Card 2 -->
+      <div class="rag-card" style="border-left: 4px solid #0284c7;">
+        <span class="rag-title">FastEmbed (ONNX)</span>
+        <span class="rag-detail">BAAI/bge-small-en-v1.5 &bull; CPU ~60MB RAM</span>
+      </div>
+
+      <div class="mini-arrow-down">&darr;</div>
+
+      <!-- RAG Card 3 -->
+      <div class="rag-card" style="border-left: 4px solid #10b981;">
+        <span class="rag-title">In-Memory FAISS Store</span>
+        <span class="rag-detail">7 KB Articles &bull; 0.88 Threshold Guard</span>
+      </div>
+
+      <div class="mini-arrow-down">&darr;</div>
+
+      <!-- RAG Card 4 -->
+      <div class="rag-card" style="border-left: 4px solid #f59e0b;">
+        <span class="rag-title">LLM Triage Engine</span>
+        <span class="rag-detail">Deterministic/Mock &bull; Groq &bull; Hugging Face</span>
+      </div>
+    </div>
+
+  </div>
+
+</div>
+
+</body>
+</html>
