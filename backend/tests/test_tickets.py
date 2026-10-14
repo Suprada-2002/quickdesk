@@ -194,3 +194,28 @@ def test_agent_reply_and_resolution(client, test_employee, test_agent):
     # 3. Resolver ID and timestamp set
     assert resolved_ticket["resolved_by_id"] == test_agent.id
     assert resolved_ticket["resolved_at"] is not None
+
+    # 4. Immutability guardrails: override, draft regen, and re-reply are blocked (400)
+    override_attempt = client.patch(
+        f"/api/tickets/{t_id}/override",
+        json={"field_name": "category", "new_value": "IT"},
+        headers={"Authorization": f"Bearer {agent_token}"}
+    )
+    assert override_attempt.status_code == 400
+    assert "already resolved" in override_attempt.json()["detail"].lower()
+
+    draft_attempt = client.post(
+        f"/api/tickets/{t_id}/generate-draft",
+        headers={"Authorization": f"Bearer {agent_token}"}
+    )
+    assert draft_attempt.status_code == 400
+    assert "already resolved" in draft_attempt.json()["detail"].lower()
+
+    re_reply_attempt = client.post(
+        f"/api/tickets/{t_id}/reply",
+        json={"reply": "Another reply attempt"},
+        headers={"Authorization": f"Bearer {agent_token}"}
+    )
+    assert re_reply_attempt.status_code == 400
+    assert "already resolved" in re_reply_attempt.json()["detail"].lower()
+

@@ -162,6 +162,12 @@ def override_ticket_attribute(
             detail=f"Ticket #{ticket_id} not found",
         )
 
+    if ticket.status == TicketStatus.RESOLVED:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Cannot modify or override attributes of an already resolved ticket. Reopen the ticket first.",
+        )
+
     field_name = override_in.field_name.lower().strip()
     new_val = override_in.new_value.strip()
 
@@ -240,6 +246,12 @@ def regenerate_rag_draft(
             detail=f"Ticket #{ticket_id} not found",
         )
 
+    if ticket.status == TicketStatus.RESOLVED:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Cannot regenerate AI draft for an already resolved ticket",
+        )
+
     draft_reply, citations = ai_service.generate_rag_reply(ticket.title, ticket.description)
     ticket.ai_drafted_reply = draft_reply
     ticket.citations = citations
@@ -265,6 +277,12 @@ def send_final_reply(
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Ticket #{ticket_id} not found",
+        )
+
+    if ticket.status == TicketStatus.RESOLVED:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="This ticket is already resolved and locked",
         )
 
     ticket.final_reply = reply_in.reply.strip()
