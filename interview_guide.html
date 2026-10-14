@@ -1,0 +1,1063 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>QuickDesk — Technical Architecture & Interview Master Guide</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #4f46e5;
+      --primary-light: #eef2ff;
+      --primary-dark: #3730a3;
+      --slate-900: #0f172a;
+      --slate-800: #1e293b;
+      --slate-700: #334155;
+      --slate-600: #475569;
+      --slate-500: #64748b;
+      --slate-200: #e2e8f0;
+      --slate-100: #f1f5f9;
+      --slate-50: #f8fafc;
+      --emerald: #059669;
+      --emerald-light: #ecfdf5;
+      --rose: #e11d48;
+      --rose-light: #fff1f2;
+      --amber: #d97706;
+      --amber-light: #fffbeb;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background: var(--slate-50);
+      color: var(--slate-800);
+      line-height: 1.6;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 40px 24px;
+    }
+
+    /* Header */
+    header {
+      background: linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #4338ca 100%);
+      color: white;
+      padding: 48px 32px;
+      border-radius: 20px;
+      margin-bottom: 40px;
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+    }
+
+    header h1 {
+      font-size: 2.5rem;
+      font-weight: 800;
+      letter-spacing: -0.025em;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    header p {
+      font-size: 1.125rem;
+      color: #c7d2fe;
+      max-width: 800px;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .badge-primary { background: rgba(255, 255, 255, 0.15); color: white; border: 1px solid rgba(255, 255, 255, 0.2); }
+    .badge-green { background: var(--emerald-light); color: var(--emerald); border: 1px solid #a7f3d0; }
+    .badge-amber { background: var(--amber-light); color: var(--amber); border: 1px solid #fde68a; }
+    .badge-rose { background: var(--rose-light); color: var(--rose); border: 1px solid #fecdd3; }
+
+    /* Navigation / TOC */
+    .toc {
+      background: white;
+      border: 1px solid var(--slate-200);
+      border-radius: 16px;
+      padding: 24px;
+      margin-bottom: 40px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+
+    .toc h2 {
+      font-size: 1.125rem;
+      font-weight: 700;
+      color: var(--slate-900);
+      margin-bottom: 16px;
+    }
+
+    .toc-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 12px;
+    }
+
+    .toc a {
+      color: var(--primary);
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 600;
+      padding: 8px 12px;
+      border-radius: 8px;
+      background: var(--slate-50);
+      border: 1px solid var(--slate-200);
+      display: block;
+      transition: all 0.2s;
+    }
+
+    .toc a:hover {
+      background: var(--primary-light);
+      border-color: #c7d2fe;
+      transform: translateX(4px);
+    }
+
+    /* Content Cards */
+    section {
+      background: white;
+      border: 1px solid var(--slate-200);
+      border-radius: 16px;
+      padding: 36px;
+      margin-bottom: 36px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+
+    section h2 {
+      font-size: 1.75rem;
+      font-weight: 800;
+      color: var(--slate-900);
+      letter-spacing: -0.02em;
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 2px solid var(--slate-100);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    section h3 {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--slate-900);
+      margin: 28px 0 12px 0;
+    }
+
+    section h4 {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--slate-700);
+      margin: 20px 0 8px 0;
+    }
+
+    p {
+      color: var(--slate-600);
+      margin-bottom: 16px;
+      font-size: 0.95rem;
+    }
+
+    ul, ol {
+      margin-left: 24px;
+      margin-bottom: 16px;
+      color: var(--slate-600);
+      font-size: 0.95rem;
+    }
+
+    li {
+      margin-bottom: 8px;
+    }
+
+    strong {
+      color: var(--slate-900);
+    }
+
+    /* Diagram / Pre Box */
+    pre.diagram {
+      background: #0f172a;
+      color: #38bdf8;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.825rem;
+      line-height: 1.4;
+      padding: 24px;
+      border-radius: 12px;
+      overflow-x: auto;
+      margin: 20px 0;
+      border: 1px solid #1e293b;
+    }
+
+    code {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.85em;
+      background: var(--slate-100);
+      color: #d946ef;
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+
+    pre code {
+      background: transparent;
+      color: #e2e8f0;
+      padding: 0;
+    }
+
+    pre.code-block {
+      background: #1e1e2e;
+      color: #cdd6f4;
+      font-family: 'JetBrains Mono', monospace;
+      padding: 20px;
+      border-radius: 12px;
+      font-size: 0.85rem;
+      overflow-x: auto;
+      margin: 16px 0;
+      border: 1px solid #313244;
+    }
+
+    /* Tables */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 20px 0;
+      font-size: 0.875rem;
+    }
+
+    th, td {
+      padding: 12px 16px;
+      border: 1px solid var(--slate-200);
+      text-align: left;
+    }
+
+    th {
+      background: var(--slate-50);
+      color: var(--slate-900);
+      font-weight: 700;
+    }
+
+    tr:hover {
+      background: #f8fafc;
+    }
+
+    .callout {
+      border-left: 4px solid var(--primary);
+      background: var(--primary-light);
+      padding: 16px 20px;
+      border-radius: 0 12px 12px 0;
+      margin: 20px 0;
+      color: #312e81;
+      font-size: 0.925rem;
+    }
+
+    .callout-amber {
+      border-left-color: var(--amber);
+      background: var(--amber-light);
+      color: #78350f;
+    }
+
+    .callout-green {
+      border-left-color: var(--emerald);
+      background: var(--emerald-light);
+      color: #064e3b;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin: 20px 0;
+    }
+
+    @media (max-width: 768px) {
+      .grid-2 { grid-template-columns: 1fr; }
+      header { padding: 32px 20px; }
+      section { padding: 24px 18px; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+
+    <!-- Header Banner -->
+    <header>
+      <span class="badge badge-primary">Internal Interview & System Design Dossier</span>
+      <h1>⚡ QuickDesk Technical Architecture</h1>
+      <p>A comprehensive masterclass covering System Architecture, Data Flow, LLM Triage, LangChain RAG, Role-Based Access Control, Real-Time Socket.IO, and Endpoints for technical presentation.</p>
+    </header>
+
+    <!-- Table of Contents -->
+    <nav class="toc">
+      <h2>📑 Table of Contents</h2>
+      <div class="toc-grid">
+        <a href="#section-1">1. 2-Minute Elevator Pitch</a>
+        <a href="#section-2">2. Technology Stack & "Why"</a>
+        <a href="#section-3">3. Roles: Employee vs. Agent</a>
+        <a href="#section-4">4. End-to-End Working Flow</a>
+        <a href="#section-5">5. AI Engine: Category & Confidence</a>
+        <a href="#section-6">6. The LangChain RAG Pipeline</a>
+        <a href="#section-7">7. Faceted Search & Query Engine</a>
+        <a href="#section-8">8. Real-Time WebSockets (Socket.IO)</a>
+        <a href="#section-9">9. Database Schema & Audit Models</a>
+        <a href="#section-10">10. Complete API Endpoints Table</a>
+        <a href="#section-11">11. Tough Interview Questions</a>
+      </div>
+    </nav>
+
+    <!-- SECTION 1 -->
+    <section id="section-1">
+      <h2>1. The 2-Minute Elevator Pitch (How to start your interview)</h2>
+      <div class="callout">
+        <strong>The Problem:</strong> Internal IT and HR support teams are inundated with repetitive inquiries ("VPN drops", "expense limit", "battery dying"). Traditional portals require manual categorization, manual triage, and manual drafting, causing high resolution times.
+      </div>
+      <p>
+        <strong>What QuickDesk is:</strong> QuickDesk is an AI-assisted internal helpdesk platform where the LLM acts as an <em>intelligent co-pilot</em> rather than replacing the human agent.
+      </p>
+      <ul>
+        <li><strong>Automatic Triage:</strong> The moment an employee files a ticket, the backend executes LLM classification to predict Category (IT, HR, Finance, Admin, Other), Priority (Low, Medium, High), and a confidence score.</li>
+        <li><strong>Grounded RAG Draft:</strong> Using LangChain and FastEmbed vectors over internal markdown policies, it pre-drafts an actionable reply with citations so the agent never starts from a blank page.</li>
+        <li><strong>Human in the Loop:</strong> The agent retains full authority. They can override categories/priorities (which logs to an immutable audit trail) and customize the draft before hitting Send.</li>
+        <li><strong>Real-Time Updates:</strong> Socket.IO broadcasts updates without page reloads—new tickets pop onto agent dashboards live, and employee ticket badges flip to "Resolved" instantly.</li>
+      </ul>
+    </section>
+
+    <!-- SECTION 2 -->
+    <section id="section-2">
+      <h2>2. Technologies Used & Why They Were Chosen</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Layer</th>
+            <th>Technology</th>
+            <th>How It Works In QuickDesk</th>
+            <th>Why We Chose It</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Frontend</strong></td>
+            <td><strong>React 18 + Vite + Tailwind CSS</strong></td>
+            <td>Single Page Application (SPA) with role-segmented dashboards, interactive RAG editor, live Socket.IO connection indicator, and Lucide icons.</td>
+            <td>Vite provides instant Hot Module Replacement (HMR). React SPA eliminates unnecessary Server-Side Rendering overhead for internal authenticated applications.</td>
+          </tr>
+          <tr>
+            <td><strong>Backend</strong></td>
+            <td><strong>Python 3.12 + FastAPI</strong></td>
+            <td>High-performance ASGI server handling REST APIs, Pydantic v2 schemas, and dependency injection for security.</td>
+            <td>Native async support, automatic OpenAPI Swagger documentation, and clean integration with Python's AI/ML ecosystem.</td>
+          </tr>
+          <tr>
+            <td><strong>Database</strong></td>
+            <td><strong>PostgreSQL 15 + SQLAlchemy 2.0</strong></td>
+            <td>Stores users, tickets, and override audit logs using connection pooling and the modern <code>psycopg</code> (v3) driver.</td>
+            <td>ACID compliance, relational integrity with foreign keys, and ready for future <code>pgvector</code> extension upgrades.</td>
+          </tr>
+          <tr>
+            <td><strong>Authentication</strong></td>
+            <td><strong>Argon2id + PyJWT</strong></td>
+            <td>Password hashing via Argon2id (OWASP #1 standard). State-less JWT tokens containing user ID, role, and email in payload.</td>
+            <td>Argon2id is memory-hard and GPU-brute-force resistant. JWTs allow stateless RBAC verification across HTTP and WebSockets.</td>
+          </tr>
+          <tr>
+            <td><strong>AI Triage</strong></td>
+            <td><strong>Hugging Face / Groq / Fallback NLP</strong></td>
+            <td>Configurable LLM provider classifying tickets into strict enums with confidence scoring.</td>
+            <td>Free-tier compatibility (Llama 3.2, Mistral-7B, or Groq) with an offline deterministic fallback that guarantees zero test failures.</td>
+          </tr>
+          <tr>
+            <td><strong>RAG Pipeline</strong></td>
+            <td><strong>LangChain + FastEmbed + FAISS</strong></td>
+            <td>Chunks 7 internal markdown articles, embeds them into 384-dim vectors via ONNX CPU runtime, and runs in-memory similarity search.</td>
+            <td>FastEmbed uses ONNX runtime (~60MB RAM) and runs 4x faster on CPU than heavy 2GB PyTorch/CUDA libraries.</td>
+          </tr>
+          <tr>
+            <td><strong>Real-Time</strong></td>
+            <td><strong>python-socketio + socket.io-client</strong></td>
+            <td>Mounted directly on FastAPI ASGI. Room segregation: <code>agents</code> broadcast room vs. <code>user_{id}</code> private rooms.</td>
+            <td>Automatic transport fallback (WebSockets to polling), heartbeat pings, and built-in room management.</td>
+          </tr>
+          <tr>
+            <td><strong>Testing</strong></td>
+            <td><strong>pytest + httpx</strong></td>
+            <td>21 automated tests covering password hashing, JWT, RBAC 403s, RAG retrieval, guardrails, tickets, and socket broadcasts.</td>
+            <td>FastAPI TestClient integration, async pytest markers, and test session database fixtures.</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- SECTION 3 -->
+    <section id="section-3">
+      <h2>3. Roles & Permissions: Employee vs. Agent</h2>
+      <div class="grid-2">
+        <div style="background: var(--slate-50); padding: 20px; border-radius: 12px; border: 1px solid var(--slate-200);">
+          <span class="badge badge-green">Employee Role</span>
+          <h3 style="margin-top: 12px;">What Employees Can Do</h3>
+          <ul>
+            <li>Submit tickets (Title, description, attachment filename).</li>
+            <li>View <strong>ONLY their own tickets</strong> under "My Tickets".</li>
+            <li>Receive instant live updates when their ticket flips to "Resolved".</li>
+            <li>Inspect the final reply sent by the support team.</li>
+          </ul>
+          <p style="color: var(--rose); font-size: 0.85rem; font-weight: 700;">
+            ⛔ Backend Restriction: If an employee queries <code>GET /api/tickets/99</code> belonging to another employee, FastAPI raises <code>HTTP 403 Forbidden</code>.
+          </p>
+        </div>
+
+        <div style="background: var(--slate-50); padding: 20px; border-radius: 12px; border: 1px solid var(--slate-200);">
+          <span class="badge badge-primary">Support Agent Role</span>
+          <h3 style="margin-top: 12px;">What Support Agents Can Do</h3>
+          <ul>
+            <li>View <strong>ALL company tickets</strong> across all employees.</li>
+            <li>Filter by Status, Category, Priority, and Search on Title.</li>
+            <li><strong>Override</strong> AI suggestions (changes are logged in audit history).</li>
+            <li>Review RAG citations and edit the AI-drafted reply.</li>
+            <li>Click "Send Reply" to resolve the ticket.</li>
+            <li>Access the <strong>Operations Metrics Dashboard</strong>.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 4 -->
+    <section id="section-4">
+      <h2>4. End-to-End Application Working Flow</h2>
+      <pre class="diagram">
+[Step 1: Employee submits ticket]
+  └── POST /api/tickets { title: "WireGuard VPN handshake timeout", description: "..." }
+        │
+        ├──▶ [AI Classification] (ai_service.py)
+        │      └── Predicts: Category = "IT", Priority = "High", Confidence = 94%
+        │
+        ├──▶ [LangChain RAG Pipeline] (rag_service.py)
+        │      └── Queries in-memory FAISS vector index
+        │      └── Retrieves chunks from "vpn_setup.md" (distance = 0.5049 < threshold 0.88)
+        │      └── Generates step-by-step grounded draft reply with citations
+        │
+        ├──▶ [Database Save] (PostgreSQL)
+        │      └── Saves ticket: status = "open", ai_suggested_category = "IT", etc.
+        │
+        └──▶ [Real-time Broadcast] (Socket.IO)
+               └── Emits 'ticket_created' to room 'agents'
+
+[Step 2: Agent Dashboard updates live]
+  └── Notification toast pops up on Agent screen without page reload.
+  └── Agent opens ticket #1:
+        ├── Views employee identity (John Employee)
+        ├── Views AI Category & Priority with confidence badge
+        ├── Views Citations badge (links to vpn_setup.md excerpts)
+        └── Views editable AI draft in response box
+
+[Step 3: Agent Overrides Priority]
+  └── Agent clicks Override Priority -> changes "High" to "Medium"
+  └── PATCH /api/tickets/1/override { field_name: "priority", new_value: "Medium" }
+  └── Backend saves change into 'ticket_override_logs':
+        (Agent Sarah, Priority, "High" -> "Medium", 10:15 AM)
+  └── Audit trail updates on screen live!
+
+[Step 4: Agent Sends Final Reply]
+  └── Agent edits response text -> clicks "Send Reply & Mark Resolved"
+  └── POST /api/tickets/1/reply { reply: "Hi John, update your WireGuard client..." }
+  └── Backend marks status = "resolved", records resolved_at and resolver_id
+  └── Preserves BOTH original AI draft AND final reply in database!
+  └── Emits 'ticket_resolved' event to room 'user_{john_id}'
+
+[Step 5: Employee sees live flip]
+  └── On John's screen ("My Tickets"), status flips to "Resolved" with green checkmark!
+  └── Zero page reload needed.
+      </pre>
+    </section>
+
+    <!-- SECTION 5 -->
+    <section id="section-5">
+      <h2>5. The AI Engine: Category Assignment, Confidence Score & Triage Guardrails</h2>
+      
+      <h3>1. How Category is Assigned by the LLM (Architecture & Pipeline)</h3>
+      <p>
+        In <code>backend/app/services/ai_service.py</code>, ticket classification does not treat the LLM as a chatty assistant. Instead, it operates as a <strong>strictly constrained token classifier</strong> governed by a multi-stage ingestion and sanitization pipeline:
+      </p>
+
+      <pre class="diagram">
+[Raw Ticket Submission] (Title + Description)
+       │
+       ▼
+[Stage 1: In-Context Prompt & Constraint Injection]
+       ├── Sets Persona: "Internal IT Helpdesk triage classifier"
+       ├── Enforces Discrete Enum Space: [IT, HR, Finance, Admin, Other]
+       ├── Sets Temperature = 0.2 (low variance, argmax greedy sampling)
+       └── Enforces Raw JSON Output Schema: {"category": "...", "priority": "...", "confidence": ...}
+       │
+       ▼
+[Stage 2: Provider Invocation Layer]
+       ├── Primary Online: Hugging Face (Llama-3.2-3B-Instruct) / Groq API (llama-3.1-8b-instant)
+       └── Fallback Engine: Deterministic Rule-Based NLP if offline, unkeyed, or rate-limited (HTTP 429)
+       │
+       ▼
+[Stage 3: Non-Greedy Regex JSON Extractor]
+       └── re.search(r"\{.*?\}", raw_output, re.DOTALL)
+       └── Strips Markdown code fences (```json ... ```) & conversational preamble ("Here is the triage:")
+       │
+       ▼
+[Stage 4: Normalization & Exact Enum Validation]
+       └── Case-folding & whitespace trimming against TicketCategory.ALL
+       │
+       ▼
+[Stage 5: Fuzzy Synonym & Alias Mapping (CATEGORY_MAP)]
+       ├── "vpn", "wireguard", "laptop", "wifi", "software" ──▶ Maps to "IT"
+       ├── "pto", "vacation", "sick leave", "bamboohr"       ──▶ Maps to "HR"
+       ├── "reimbursement", "expensify", "payroll", "budget"  ──▶ Maps to "Finance"
+       └── "badge", "parking", "keycard", "desk", "office"   ──▶ Maps to "Admin"
+       │
+       ▼
+[Stage 6: Fail-Safe Default Fallback]
+       └── If unrecognized/hallucinated (e.g. "Legal"), safely defaults to "Other" (Never 500s!)
+      </pre>
+
+      <h4>The Exact Prompt Template Used:</h4>
+      <pre class="code-block">
+prompt = f"""You are an internal IT Helpdesk triage classifier.
+Given the ticket title and description below, classify it into:
+1. Category: Exactly one of [IT, HR, Finance, Admin, Other]
+2. Priority: Exactly one of [Low, Medium, High]
+3. Confidence: A decimal between 0.0 and 1.0
+
+Ticket Title: {title}
+Ticket Description: {description}
+
+Respond ONLY in valid JSON format:
+{{"category": "IT", "priority": "High", "confidence": 0.95}}"""
+      </pre>
+
+      <div class="callout callout-amber">
+        <strong>Why Low Temperature (0.2)?</strong> For creative prose or chatbots, high temperatures (0.7–1.0) produce varied responses. In enterprise triage, variability is a defect. A temperature of 0.2 concentrates the probability distribution around the argmax tokens, maximizing deterministic consistency.
+      </div>
+
+      <h3>2. The AI Confidence Score: Mathematical Logic, Calculation & Purpose</h3>
+      <p>
+        Every classified ticket receives an <code>ai_confidence_score</code> stored in PostgreSQL and rendered as a visual badge in the agent portal (e.g., <span class="badge badge-primary">94% AI Confidence</span>).
+      </p>
+
+      <h4>How the Confidence Score is Calculated:</h4>
+      <ul>
+        <li>
+          <strong>Online LLM Generation (Model Self-Assessment):</strong>
+          The prompt forces the model to evaluate the linguistic ambiguity and semantic alignment between the ticket details and the target category.
+          <ul>
+            <li><strong>High Confidence (0.90 – 0.98):</strong> Unambiguous symptoms matching known technical jargon (e.g., <em>"WireGuard UDP 51820 TLS handshake timeout"</em>).</li>
+            <li><strong>Moderate Confidence (0.75 – 0.88):</strong> Standard requests with slight cross-domain overlap (e.g., <em>"Need access to the budget planning drive"</em> — IT drive permission vs. Finance ownership).</li>
+            <li><strong>Low Confidence (&lt; 0.75):</strong> Short, ambiguous, or multi-topic descriptions (e.g., <em>"I need help with my work environment"</em>).</li>
+          </ul>
+        </li>
+        <li>
+          <strong>Sanitization & Boundary Clamping:</strong>
+          Real models might return numbers like <code>1.5</code> or strings like <code>"high"</code>. The backend enforces mathematical bounding:
+          <pre class="code-block">confidence = float(data.get("confidence", 0.85))
+confidence = max(0.1, min(1.0, confidence))  # Clamped strictly to [0.10, 1.00]
+return round(confidence, 2)</pre>
+        </li>
+        <li>
+          <strong>Offline Deterministic Heuristic Scoring:</strong>
+          When operating in offline/mock mode, confidence is computed using keyword match density and token specificity:
+          <table>
+            <thead>
+              <tr>
+                <th>Classification Match Type</th>
+                <th>Sample Trigger Keywords</th>
+                <th>Assigned Confidence Score</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Primary IT Core Signals</strong></td>
+                <td><code>vpn</code>, <code>wireguard</code>, <code>wifi</code>, <code>macbook</code>, <code>thinkpad</code></td>
+                <td><span class="badge badge-green">0.94 (94%)</span></td>
+              </tr>
+              <tr>
+                <td><strong>Primary HR Core Signals</strong></td>
+                <td><code>pto</code>, <code>vacation</code>, <code>sick leave</code>, <code>bamboohr</code></td>
+                <td><span class="badge badge-green">0.91 (91%)</span></td>
+              </tr>
+              <tr>
+                <td><strong>Primary Finance Core Signals</strong></td>
+                <td><code>expensify</code>, <code>reimbursement</code>, <code>invoice</code>, <code>payroll</code></td>
+                <td><span class="badge badge-green">0.89 (89%)</span></td>
+              </tr>
+              <tr>
+                <td><strong>Primary Admin Facilities Signals</strong></td>
+                <td><code>badge</code>, <code>keycard</code>, <code>desk</code>, <code>parking</code></td>
+                <td><span class="badge badge-green">0.85 (85%)</span></td>
+              </tr>
+              <tr>
+                <td><strong>Generic / Unclassified ("Other")</strong></td>
+                <td>No domain keywords found (fallback)</td>
+                <td><span class="badge badge-amber">0.70 (70%)</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </li>
+      </ul>
+
+      <h4>Why Confidence Scores Matter in Enterprise Architecture (Interview Talking Points):</h4>
+      <div class="grid-2">
+        <div style="background: var(--slate-50); padding: 18px; border-radius: 12px; border: 1px solid var(--slate-200);">
+          <strong>1. Human-in-the-Loop Triage Filter</strong>
+          <p style="margin-top: 6px; font-size: 0.875rem;">Agents can glance at the badge to see if the AI's triage was high-certainty or borderline. Borderline tickets receive extra scrutiny before routing or replying.</p>
+        </div>
+        <div style="background: var(--slate-50); padding: 18px; border-radius: 12px; border: 1px solid var(--slate-200);">
+          <strong>2. Automated Routing Thresholds</strong>
+          <p style="margin-top: 6px; font-size: 0.875rem;">At scale, tickets with &ge; 95% confidence can be auto-routed to Tier-1 resolvers without human triage delay, while tickets with &lt; 80% confidence trigger mandatory human review.</p>
+        </div>
+        <div style="background: var(--slate-50); padding: 18px; border-radius: 12px; border: 1px solid var(--slate-200);">
+          <strong>3. Model Drift & Calibration Auditing</strong>
+          <p style="margin-top: 6px; font-size: 0.875rem;">By comparing initial confidence against agent overrides (logged in <code>ticket_override_logs</code>), engineering teams calculate model calibration error to detect prompt degradation over time.</p>
+        </div>
+        <div style="background: var(--slate-50); padding: 18px; border-radius: 12px; border: 1px solid var(--slate-200);">
+          <strong>4. Fallback Safety Net</strong>
+          <p style="margin-top: 6px; font-size: 0.875rem;">Guarantees that low-confidence tickets default to a safe <code>Other</code> category and <code>Medium</code> priority without throwing database validation exceptions.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 6 -->
+    <section id="section-6">
+      <h2>6. The LangChain RAG Pipeline & In-Memory Vector Store</h2>
+      <p>
+        Located in <code>backend/app/services/rag_service.py</code>. Here is exactly how it is structured:
+      </p>
+
+      <h3>1. Knowledge Base Articles (7 Markdown files)</h3>
+      <p>
+        Stored in <code>backend/app/kb/</code> (150–250 words each):
+        <code>vpn_setup.md</code>, <code>password_reset_policy.md</code>, <code>leave_application_process.md</code>, <code>expense_reimbursement.md</code>, <code>laptop_request.md</code>, <code>finance_drive_access.md</code>, and <code>software_license_request.md</code>.
+      </p>
+
+      <h3>2. Chunking</h3>
+      <p>
+        Uses <code>RecursiveCharacterTextSplitter(chunk_size=400, chunk_overlap=50)</code>. 400 characters captures self-contained policy paragraphs, and 50 characters overlap prevents losing context at chunk boundaries.
+      </p>
+
+      <h3>3. Embeddings: Why FastEmbed?</h3>
+      <p>
+        Standard PyTorch <code>sentence-transformers</code> downloads a 550MB PyTorch wheel and 1.5GB of CUDA drivers. Instead, we use <strong>FastEmbed</strong> (<code>BAAI/bge-small-en-v1.5</code>):
+      </p>
+      <ul>
+        <li>Runs on pure ONNX runtime.</li>
+        <li>Requires ~60MB RAM footprint.</li>
+        <li>Executes 4x faster on CPU with zero GPU dependencies.</li>
+      </ul>
+
+      <h3>4. Similarity Threshold Calibration & Anti-Hallucination Guardrail</h3>
+      <p>
+        Chunks are indexed in an in-memory <strong>FAISS</strong> vector store. In FAISS L2/Euclidean distance, lower numbers mean higher relevance.
+      </p>
+      <table>
+        <thead>
+          <tr>
+            <th>Query Type</th>
+            <th>Sample Query</th>
+            <th>Measured Distance Score</th>
+            <th>Outcome</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Relevant</strong></td>
+            <td>"WireGuard VPN disconnects timeout"</td>
+            <td><code>0.5049</code></td>
+            <td><span class="badge badge-green">Match (Accepted)</span></td>
+          </tr>
+          <tr>
+            <td><strong>Relevant</strong></td>
+            <td>"How do I claim reimbursement in Expensify"</td>
+            <td><code>0.5327</code></td>
+            <td><span class="badge badge-green">Match (Accepted)</span></td>
+          </tr>
+          <tr>
+            <td><strong>Relevant</strong></td>
+            <td>"Laptop battery drains quickly ThinkPad"</td>
+            <td><code>0.7297</code></td>
+            <td><span class="badge badge-green">Match (Accepted)</span></td>
+          </tr>
+          <tr>
+            <td><strong>Irrelevant</strong></td>
+            <td>"What is the recipe for cookies on Mars?"</td>
+            <td><code>1.0715</code></td>
+            <td><span class="badge badge-rose">Rejected (Guardrail Triggered)</span></td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="callout callout-green">
+        <strong>The Guardrail Rule:</strong> If the distance score is <strong>&gt; 0.88</strong>, the system triggers the guardrail:
+        <code>is_relevant = False</code> and <code>citations = []</code>.<br>
+        The AI generates an honest fallback reply: <em>"I could not find relevant documentation in our internal knowledge base for this request. I have forwarded this ticket to our support team."</em> (Zero hallucinations!).
+      </div>
+    </section>
+
+    <!-- SECTION 7 -->
+    <section id="section-7">
+      <h2>7. Faceted Searching & Multi-Dimensional Query Engine</h2>
+      <p>
+        Located in <code>backend/app/api/tickets.py</code> and <code>frontend/src/pages/AgentDashboard.jsx</code>.
+      </p>
+
+      <h3>1. What is Faceted Searching vs. Simple Search?</h3>
+      <p>
+        Traditional search is a single free-text input (e.g. typing a keyword into a bar). 
+        <strong>Faceted Search</strong> allows support agents to simultaneously filter a dataset across multiple independent, orthogonal dimensions (facets) to isolate high-urgency subsets of work:
+      </p>
+      <table>
+        <thead>
+          <tr>
+            <th>Facet Dimension</th>
+            <th>Allowable Values in QuickDesk</th>
+            <th>Operational Purpose for Support Team</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Status Facet</strong></td>
+            <td><code>All</code>, <code>Open</code>, <code>Resolved</code></td>
+            <td>Isolate active work queue vs. historical closed records.</td>
+          </tr>
+          <tr>
+            <td><strong>Category Facet</strong></td>
+            <td><code>All</code>, <code>IT</code>, <code>HR</code>, <code>Finance</code>, <code>Admin</code>, <code>Other</code></td>
+            <td>Route to specialized departmental squads (e.g. IT engineers only review IT tickets).</td>
+          </tr>
+          <tr>
+            <td><strong>Priority Facet</strong></td>
+            <td><code>All</code>, <code>Low</code>, <code>Medium</code>, <code>High</code></td>
+            <td>SLA triage (e.g. "Show me all Open High-Priority tickets that need immediate response").</td>
+          </tr>
+          <tr>
+            <td><strong>Full-Text Query</strong></td>
+            <td>Free-text string (e.g. "WireGuard", "Expensify")</td>
+            <td>Substring keyword search across ticket titles and descriptions.</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3>2. Backend Dynamic Query Compilation in SQLAlchemy</h3>
+      <p>
+        Instead of writing separate SQL queries for every permutation of filters, the backend dynamically composes the query using SQLAlchemy's declarative builder pattern:
+      </p>
+
+      <pre class="code-block">
+@router.get("", response_model=List[TicketResponse])
+def list_tickets(
+    status_filter: Optional[str] = Query(None, alias="status"),
+    category_filter: Optional[str] = Query(None, alias="category"),
+    priority_filter: Optional[str] = Query(None, alias="priority"),
+    search: Optional[str] = Query(None),
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    query = db.query(Ticket)
+
+    # 1. Mandatory Role-Based Access Control Scoping
+    if current_user.role == UserRole.EMPLOYEE:
+        query = query.filter(Ticket.created_by_id == current_user.id)
+
+    # 2. Dynamic Facet Evaluation (Conjunctive AND Logic)
+    if status_filter and status_filter.lower() != "all":
+        query = query.filter(Ticket.status == status_filter.lower().strip())
+
+    if category_filter and category_filter.lower() != "all":
+        query = query.filter(Ticket.category == category_filter.strip())
+
+    if priority_filter and priority_filter.lower() != "all":
+        query = query.filter(Ticket.priority == priority_filter.strip())
+
+    # 3. Case-Insensitive Full-Text Search across Title OR Description
+    if search and search.strip():
+        search_pattern = f"%{search.strip()}%"
+        query = query.filter(
+            or_(
+                Ticket.title.ilike(search_pattern),
+                Ticket.description.ilike(search_pattern)
+            )
+        )
+
+    # 4. Strict Chronological Ordering
+    return query.order_by(Ticket.created_at.desc()).all()
+      </pre>
+
+      <h4>The Compiled SQL Produced by PostgreSQL:</h4>
+      <pre class="code-block">
+SELECT tickets.id, tickets.title, tickets.status, tickets.category, tickets.priority, ...
+FROM tickets
+WHERE tickets.status = 'open'
+  AND tickets.category = 'IT'
+  AND tickets.priority = 'High'
+  AND (tickets.title ILIKE '%vpn%' OR tickets.description ILIKE '%vpn%')
+ORDER BY tickets.created_at DESC;
+      </pre>
+
+      <h3>3. Frontend UX & Reactive State Management</h3>
+      <p>
+        In <code>frontend/src/pages/AgentDashboard.jsx</code>, faceted search is made responsive and resilient through key engineering patterns:
+      </p>
+      <ul>
+        <li>
+          <strong>Reactive Multi-Select Synchronization:</strong>
+          Changing any dropdown (Status, Category, Priority) triggers an immediate re-fetch via <code>useEffect([statusFilter, categoryFilter, priorityFilter])</code>.
+        </li>
+        <li>
+          <strong>300ms Debounced Free-Text Search:</strong>
+          <pre class="code-block">
+// Debounced search: waits 300ms after user pauses typing before firing HTTP query
+useEffect(() => {
+  const timer = setTimeout(() => {
+    fetchTickets();
+  }, 300);
+  return () => clearTimeout(timer);
+}, [search]);
+          </pre>
+          <div class="callout callout-green">
+            <strong>Why Debouncing is Critical:</strong> If an agent types <em>"WireGuard"</em> (9 characters), an un-debounced input would trigger 9 rapid HTTP requests to the backend. This wastes database IOPS, clutters network bandwidth, and causes <strong>race conditions</strong> where request #4 might resolve after request #9, displaying stale results. The 300ms timer buffers keystrokes and fires only 1 optimized query.
+          </div>
+        </li>
+        <li>
+          <strong>WebSocket State Blending:</strong>
+          When an employee files a new ticket, the incoming <code>ticket_created</code> Socket.IO event prepends the ticket into the React state array without triggering a full-page reload or resetting the agent's active filter selections.
+        </li>
+      </ul>
+    </section>
+
+    <!-- SECTION 8 -->
+    <section id="section-8">
+      <h2>8. Real-Time WebSockets: Socket.IO Architecture</h2>
+      <p>
+        Located in <code>backend/app/services/socket_service.py</code>.
+      </p>
+
+      <h3>How Rooms Prevent Data Leakage</h3>
+      <p>
+        When a client connects to Socket.IO, it passes its JWT token in the <code>auth</code> handshake:
+      </p>
+      <pre class="code-block">
+def get_user_rooms_for_token(token: str) -> List[str]:
+    payload = decode_access_token(token)
+    role = payload.get("role")
+    user_id = payload.get("sub")
+
+    rooms = []
+    if role == "agent":
+        rooms.append("agents")          # Global broadcast channel for agents
+    if user_id:
+        rooms.append(f"user_{user_id}") # Private room for specific employee
+
+    return rooms
+      </pre>
+
+      <div class="callout">
+        <strong>Security Benefit:</strong> Employees <strong>never</strong> join the <code>agents</code> room. When new tickets are filed, the broadcast is scoped strictly to room <code>agents</code>. Employees cannot sniff network packets to see tickets filed by other coworkers.
+      </div>
+    </section>
+
+    <!-- SECTION 9 -->
+    <section id="section-9">
+      <h2>9. PostgreSQL Database Schema & Models</h2>
+      <p>
+        QuickDesk uses 3 core relational tables in PostgreSQL:
+      </p>
+
+      <h3>1. <code>users</code> Table</h3>
+      <ul>
+        <li><code>id</code>: Integer Primary Key (Autoincrement)</li>
+        <li><code>email</code>: String(255) Unique Indexed</li>
+        <li><code>name</code>: String(255)</li>
+        <li><code>password_hash</code>: String(255) — Argon2id hash (never plaintext!)</li>
+        <li><code>role</code>: String(20) — <code>'employee'</code> or <code>'agent'</code></li>
+        <li><code>created_at</code>: DateTime(UTC)</li>
+      </ul>
+
+      <h3>2. <code>tickets</code> Table</h3>
+      <ul>
+        <li><code>id</code>: Integer Primary Key (Autoincrement)</li>
+        <li><code>title</code>: String(255)</li>
+        <li><code>description</code>: Text</li>
+        <li><code>attachment_filename</code>: String(255) Nullable</li>
+        <li><code>status</code>: String(20) — <code>'open'</code> or <code>'resolved'</code></li>
+        <li><code>category</code>: String(50) — Effective category (IT, HR, Finance, Admin, Other)</li>
+        <li><code>priority</code>: String(20) — Effective priority (Low, Medium, High)</li>
+        <li><code>ai_suggested_category</code>: String(50) — <em>Immutable record of initial AI prediction</em></li>
+        <li><code>ai_suggested_priority</code>: String(20) — <em>Immutable record of initial AI prediction</em></li>
+        <li><code>ai_confidence_score</code>: Float Nullable</li>
+        <li><code>ai_drafted_reply</code>: Text — <em>Original RAG draft preserved for comparison</em></li>
+        <li><code>final_reply</code>: Text — <em>The actual reply sent by the agent</em></li>
+        <li><code>citations</code>: JSON — Array of cited article titles and snippets</li>
+        <li><code>created_by_id</code>: Foreign Key $\to$ <code>users.id</code></li>
+        <li><code>resolved_by_id</code>: Foreign Key $\to$ <code>users.id</code> Nullable</li>
+        <li><code>resolved_at</code>: DateTime(UTC) Nullable</li>
+      </ul>
+
+      <h3>3. <code>ticket_override_logs</code> Table</h3>
+      <ul>
+        <li><code>id</code>: Integer Primary Key</li>
+        <li><code>ticket_id</code>: Foreign Key $\to$ <code>tickets.id</code></li>
+        <li><code>agent_id</code>: Foreign Key $\to$ <code>users.id</code></li>
+        <li><code>field_name</code>: String(50) — <code>'category'</code> or <code>'priority'</code></li>
+        <li><code>from_value</code>: String(50) — Previous value</li>
+        <li><code>to_value</code>: String(50) — New overridden value</li>
+        <li><code>created_at</code>: DateTime(UTC)</li>
+      </ul>
+    </section>
+
+    <!-- SECTION 10 -->
+    <section id="section-10">
+      <h2>10. Complete Backend API Endpoints Reference</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Method</th>
+            <th>Path</th>
+            <th>Auth Required</th>
+            <th>Allowed Role</th>
+            <th>Purpose & Logic</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>POST</code></td>
+            <td><code>/api/auth/register</code></td>
+            <td>No</td>
+            <td>Public</td>
+            <td>Hashes password with Argon2id and creates new user.</td>
+          </tr>
+          <tr>
+            <td><code>POST</code></td>
+            <td><code>/api/auth/login</code></td>
+            <td>No</td>
+            <td>Public</td>
+            <td>Verifies password with Argon2id; returns signed JWT bearer token.</td>
+          </tr>
+          <tr>
+            <td><code>GET</code></td>
+            <td><code>/api/auth/me</code></td>
+            <td>Yes</td>
+            <td>Any</td>
+            <td>Validates token and returns current user profile and role.</td>
+          </tr>
+          <tr>
+            <td><code>POST</code></td>
+            <td><code>/api/tickets</code></td>
+            <td>Yes</td>
+            <td>Employee, Agent</td>
+            <td>Creates ticket. Triggers AI classification, confidence score, and RAG draft with citations. Emits <code>ticket_created</code> via Socket.IO.</td>
+          </tr>
+          <tr>
+            <td><code>GET</code></td>
+            <td><code>/api/tickets</code></td>
+            <td>Yes</td>
+            <td>Any (Scoped)</td>
+            <td><strong>Employees see ONLY their own tickets.</strong> Agents see all tickets with <code>status</code>, <code>category</code>, <code>priority</code>, and <code>search</code> filters (Faceted Search).</td>
+          </tr>
+          <tr>
+            <td><code>GET</code></td>
+            <td><code>/api/tickets/{id}</code></td>
+            <td>Yes</td>
+            <td>Owner or Agent</td>
+            <td>Returns full ticket details, citations, and draft comparison. Returns 403 if employee tries to view coworker's ticket.</td>
+          </tr>
+          <tr>
+            <td><code>PATCH</code></td>
+            <td><code>/api/tickets/{id}/override</code></td>
+            <td>Yes</td>
+            <td><strong>Agent only</strong></td>
+            <td>Overrides category or priority. Preserves initial AI suggestions. Creates audit log entry in <code>ticket_override_logs</code>. <strong>Enforces immutability: returns 400 Bad Request if ticket is already resolved.</strong></td>
+          </tr>
+          <tr>
+            <td><code>GET</code></td>
+            <td><code>/api/tickets/{id}/overrides</code></td>
+            <td>Yes</td>
+            <td><strong>Agent only</strong></td>
+            <td>Returns chronological audit history of who changed what, from, to, and when.</td>
+          </tr>
+          <tr>
+            <td><code>POST</code></td>
+            <td><code>/api/tickets/{id}/generate-draft</code></td>
+            <td>Yes</td>
+            <td><strong>Agent only</strong></td>
+            <td>Re-runs LangChain RAG pipeline to regenerate a fresh draft reply and citations. <strong>Returns 400 Bad Request if ticket is already resolved.</strong></td>
+          </tr>
+          <tr>
+            <td><code>POST</code></td>
+            <td><code>/api/tickets/{id}/reply</code></td>
+            <td>Yes</td>
+            <td><strong>Agent only</strong></td>
+            <td>Stores final reply, sets status to <code>resolved</code>, records <code>resolved_at</code>. Preserves both drafts. Emits <code>ticket_resolved</code> to employee. <strong>Returns 400 Bad Request if already resolved.</strong></td>
+          </tr>
+          <tr>
+            <td><code>GET</code></td>
+            <td><code>/api/metrics</code></td>
+            <td>Yes</td>
+            <td><strong>Agent only</strong></td>
+            <td>Computes status counts, category breakdown, median resolution time, and AI override percentage.</td>
+          </tr>
+          <tr>
+            <td><code>GET</code></td>
+            <td><code>/api/health</code></td>
+            <td>No</td>
+            <td>Public</td>
+            <td>Health check returning service status.</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- SECTION 11 -->
+    <section id="section-11">
+      <h2>11. Tough Technical Interview Questions (The "Grill Me" Section)</h2>
+
+      <h3>Q1: "Why not use Next.js instead of separate React + FastAPI?"</h3>
+      <p>
+        <strong>Your Answer:</strong> <em>"Next.js is primarily built for Server-Side Rendering (SSR) and public web apps where SEO matters. QuickDesk is an internal enterprise tool behind an authentication wall where SSR provides zero SEO benefit. Separating React and FastAPI gives us a clean separation of concerns: our Python backend can run high-performance asynchronous AI/ML workloads and WebSockets on ASGI, while the frontend is a lightweight Single Page Application that can be compiled to static assets and served behind Nginx."</em>
+      </p>
+
+      <h3>Q2: "Where did you store the JWT on the client, and what is the security tradeoff?"</h3>
+      <p>
+        <strong>Your Answer:</strong> <em>"We stored the JWT in <code>localStorage</code>. The tradeoff is that <code>localStorage</code> is vulnerable to Cross-Site Scripting (XSS) if untrusted third-party scripts execute. Using <code>HttpOnly</code> cookies prevents XSS reading, but introduces Cross-Site Request Forgery (CSRF) vulnerabilities and complicates WebSocket handshake authentication. For this internal enterprise SPA where no untrusted third-party JavaScript runs, <code>localStorage</code> provided the cleanest transport for both REST Authorization headers and Socket.IO connection handshakes."</em>
+      </p>
+
+      <h3>Q3: "What stops an employee from hitting an agent-only endpoint by guessing the URL?"</h3>
+      <p>
+        <strong>Your Answer:</strong> <em>"Role enforcement is not handled in the frontend UI—it is strictly enforced at the FastAPI dependency layer. Every agent endpoint declares <code>current_user: User = Depends(require_agent)</code>. When a request arrives, the dependency extracts the JWT, verifies the signature, and checks the user's role in the database. If an employee hits the URL, FastAPI halts execution immediately and raises an <code>HTTP 403 Forbidden</code> before any business logic or database query can run."</em>
+      </p>
+
+      <h3>Q4: "What is the worst failure mode in your system today, and how would you fix it?"</h3>
+      <p>
+        <strong>Your Answer:</strong> <em>"Today, the FAISS vector index is in-memory. If the backend process crashes or restarts, it re-indexes the markdown documents from disk at startup. While this takes under 1 second for 7 documents, in an enterprise with 50,000 policy documents, rebuilding an in-memory index on every restart would cause heavy startup latency. The production fix is to migrate from in-memory FAISS to <strong><code>pgvector</code></strong> directly inside our PostgreSQL database. This allows atomic migrations, persistent vectors alongside ticket data, and hybrid keyword + vector search."</em>
+      </p>
+
+      <h3>Q5: "Why Socket.IO over Server-Sent Events (SSE) or native WebSockets?"</h3>
+      <p>
+        <strong>Your Answer:</strong> <em>"While SSE is lightweight for one-way streams, Socket.IO provides bi-directional communication, built-in room management (allowing us to separate the <code>agents</code> broadcast channel from individual <code>user_{id}</code> channels), automatic heartbeat monitoring, and automatic fallback from WebSockets to HTTP long-polling if corporate firewalls block raw WebSocket upgrades."</em>
+      </p>
+
+      <h3>Q6: "Why did you disallow modifying priority and category on already resolved tickets?"</h3>
+      <p>
+        <strong>Your Answer:</strong> <em>"In ticket lifecycle design, once a ticket reaches a terminal state (<code>Resolved</code>/<code>Closed</code>), operational attributes like Priority and Category must become immutable. In QuickDesk, we enforce this at both the FastAPI API layer (returning <code>400 Bad Request</code>) and the React UI layer (locking the controls). There are two core architectural reasons for this:
+        First, <strong>Metrics & SLA Integrity:</strong> Priority governs queue triage urgency and SLA targets while work is active. If an agent changes priority retrospectively, it corrupts historical SLA compliance reports and MTTR (Mean Time to Resolution) analytics in <code>/api/metrics</code>.
+        Second, <strong>Auditability & Dispute Prevention:</strong> Modifying attributes after resolution compromises audit credibility. In enterprise architectures (like ServiceNow or Jira Service Management), if a ticket was genuinely misclassified, the business rule requires an explicit <strong>Reopen</strong> workflow first, rather than silently mutating closed records."</em>
+      </p>
+    </section>
+
+  </div>
+
+</body>
+</html>
