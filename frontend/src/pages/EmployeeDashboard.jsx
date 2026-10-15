@@ -41,7 +41,7 @@ export function EmployeeDashboard({ onNewTicketClick }) {
     // Socket.IO listener for live status updates
     if (socket) {
       const handleTicketResolved = (data) => {
-        console.log('[Socket.IO] Received ticket_resolved:', data);
+        // console.log('[Socket.IO] Received ticket_resolved:', data);
         setTickets((prev) =>
           prev.map((t) =>
             t.id === data.id

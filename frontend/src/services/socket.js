@@ -17,15 +17,15 @@ export function getSocket() {
     });
 
     socket.on('connect', () => {
-      console.log('[Socket.IO] Connected with socket ID:', socket.id);
+      // console.log('[Socket.IO] Connected with socket ID:', socket.id);
     });
 
     socket.on('disconnect', (reason) => {
-      console.log('[Socket.IO] Disconnected:', reason);
+      // console.log('[Socket.IO] Disconnected:', reason);
     });
 
     socket.on('connect_error', (err) => {
-      console.warn('[Socket.IO] Connection error:', err.message);
+      // console.warn('[Socket.IO] Connection error:', err.message);
     });
   } else if (token && socket.auth?.token !== token) {
     // If token updated after login, update auth & reconnect

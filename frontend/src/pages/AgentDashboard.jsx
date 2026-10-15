@@ -62,7 +62,7 @@ export function AgentDashboard({ onSelectTicket }) {
   useEffect(() => {
     if (socket) {
       const handleTicketCreated = (newTicket) => {
-        console.log('[Socket.IO] New ticket received live:', newTicket);
+        // console.log('[Socket.IO] New ticket received live:', newTicket);
         // Prepend to top of list
         setTickets((prev) => [newTicket, ...prev]);
 

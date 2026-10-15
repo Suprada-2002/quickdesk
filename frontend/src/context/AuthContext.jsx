@@ -26,7 +26,7 @@ export function AuthProvider({ children }) {
           localStorage.setItem('quickdesk_user', JSON.stringify(freshUser));
           getSocket(); // Initialize socket with current token
         } catch (err) {
-          console.warn('Session expired, logging out:', err);
+          // console.warn('Session expired, logging out:', err);
           logout();
         }
       }
